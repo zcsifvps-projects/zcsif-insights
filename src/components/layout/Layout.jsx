@@ -1,7 +1,8 @@
+cat > src/components/layout/Layout.jsx << 'EOF'
 import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { CalendarDays, GraduationCap, MessageSquareText, LayoutDashboard, LogOut, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CalendarDays, GraduationCap, MessageSquareText, LayoutDashboard, LogOut, Search, ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { cn } from '@/lib/utils';
 import { EventsApi, TrainingsApi } from '@/api/supabaseClient';
@@ -111,8 +112,86 @@ function GlobalSearch() {
   );
 }
 
-export default function Layout() {
+function SidebarContent({ collapsed, onNavigate }) {
   const { user, signOut } = useAuth();
+
+  return (
+    <>
+      <div className={cn('px-5 py-6 border-b border-line/70 overflow-hidden', collapsed && 'px-0 flex justify-center')}>
+        {collapsed ? (
+          <p className="font-display text-lg font-semibold text-forest-700 leading-tight">Z</p>
+        ) : (
+          <>
+            <p className="font-display text-lg font-semibold text-forest-700 leading-tight tracking-[-0.015em] whitespace-nowrap">
+              ZCSIF
+            </p>
+            <p className="text-xs text-ink/50 mt-0.5 tracking-[0.005em] whitespace-nowrap">Engagement Tracker</p>
+          </>
+        )}
+      </div>
+
+      {!collapsed && (
+        <div className="px-3 pt-3">
+          <GlobalSearch />
+        </div>
+      )}
+
+      <nav className="flex-1 px-3 py-4 space-y-1">
+        {NAV.map(({ to, label, icon: Icon, end }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={end}
+            onClick={onNavigate}
+            className="relative block"
+            title={collapsed ? label : undefined}
+          >
+            {({ isActive }) => (
+              <motion.div
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 32 }}
+                className={cn(
+                  'relative flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium',
+                  collapsed && 'justify-center px-2',
+                  isActive ? 'text-forest-700' : 'text-ink/70 hover:text-ink'
+                )}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="nav-active"
+                    className="absolute inset-0 rounded-md bg-forest-50"
+                    transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+                  />
+                )}
+                <Icon size={17} className="relative shrink-0" />
+                {!collapsed && <span className="relative whitespace-nowrap">{label}</span>}
+              </motion.div>
+            )}
+          </NavLink>
+        ))}
+      </nav>
+
+      <div className={cn('px-3 py-4 border-t border-line/70', collapsed && 'px-2')}>
+        {!collapsed && <p className="px-3 text-xs text-ink/50 truncate mb-2">{user?.email}</p>}
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+          onClick={signOut}
+          title={collapsed ? 'Sign out' : undefined}
+          className={cn(
+            'flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-ink/60 hover:bg-rust-100 hover:text-rust-600 transition-colors duration-150',
+            collapsed && 'justify-center px-2'
+          )}
+        >
+          <LogOut size={17} className="shrink-0" />
+          {!collapsed && 'Sign out'}
+        </motion.button>
+      </div>
+    </>
+  );
+}
+
+export default function Layout() {
   const [collapsed, setCollapsed] = useState(() => {
     try {
       return localStorage.getItem('zcsif_sidebar_collapsed') === '1';
@@ -120,6 +199,7 @@ export default function Layout() {
       return false;
     }
   });
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -127,12 +207,60 @@ export default function Layout() {
     } catch {}
   }, [collapsed]);
 
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth >= 768) setMobileOpen(false);
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col md:flex-row">
+      <div className="md:hidden flex items-center justify-between px-4 h-14 border-b border-line bg-panel/80 backdrop-blur-xl sticky top-0 z-30">
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="flex h-9 w-9 items-center justify-center rounded-md text-ink/70 hover:bg-forest-50 hover:text-forest-700"
+        >
+          <Menu size={20} />
+        </button>
+        <p className="font-display text-base font-semibold text-forest-700">ZCSIF</p>
+        <div className="w-9" />
+      </div>
+
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileOpen(false)}
+              className="md:hidden fixed inset-0 bg-black/40 z-40"
+            />
+            <motion.aside
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', stiffness: 420, damping: 40 }}
+              className="md:hidden fixed inset-y-0 left-0 w-72 max-w-[80vw] bg-panel border-r border-line z-50 flex flex-col"
+            >
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-md text-ink/60 hover:bg-forest-50 hover:text-forest-700"
+              >
+                <X size={18} />
+              </button>
+              <SidebarContent collapsed={false} onNavigate={() => setMobileOpen(false)} />
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
       <motion.aside
         animate={{ width: collapsed ? 72 : 256 }}
         transition={{ type: 'spring', stiffness: 400, damping: 36 }}
-        className="shrink-0 border-r border-line bg-panel/70 backdrop-blur-xl flex flex-col relative"
+        className="hidden md:flex shrink-0 border-r border-line bg-panel/70 backdrop-blur-xl flex-col relative"
       >
         <button
           onClick={() => setCollapsed((c) => !c)}
@@ -141,78 +269,10 @@ export default function Layout() {
         >
           {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
         </button>
-
-        <div className={cn('px-5 py-6 border-b border-line/70 overflow-hidden', collapsed && 'px-0 flex justify-center')}>
-          {collapsed ? (
-            <p className="font-display text-lg font-semibold text-forest-700 leading-tight">Z</p>
-          ) : (
-            <>
-              <p className="font-display text-lg font-semibold text-forest-700 leading-tight tracking-[-0.015em] whitespace-nowrap">
-                ZCSIF
-              </p>
-              <p className="text-xs text-ink/50 mt-0.5 tracking-[0.005em] whitespace-nowrap">Engagement Tracker</p>
-            </>
-          )}
-        </div>
-
-        {!collapsed && (
-          <div className="px-3 pt-3">
-            <GlobalSearch />
-          </div>
-        )}
-
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          {NAV.map(({ to, label, icon: Icon, end }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              className="relative block"
-              title={collapsed ? label : undefined}
-            >
-              {({ isActive }) => (
-                <motion.div
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 32 }}
-                  className={cn(
-                    'relative flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium',
-                    collapsed && 'justify-center px-2',
-                    isActive ? 'text-forest-700' : 'text-ink/70 hover:text-ink'
-                  )}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="nav-active"
-                      className="absolute inset-0 rounded-md bg-forest-50"
-                      transition={{ type: 'spring', stiffness: 500, damping: 38 }}
-                    />
-                  )}
-                  <Icon size={17} className="relative shrink-0" />
-                  {!collapsed && <span className="relative whitespace-nowrap">{label}</span>}
-                </motion.div>
-              )}
-            </NavLink>
-          ))}
-        </nav>
-
-        <div className={cn('px-3 py-4 border-t border-line/70', collapsed && 'px-2')}>
-          {!collapsed && <p className="px-3 text-xs text-ink/50 truncate mb-2">{user?.email}</p>}
-          <motion.button
-            whileTap={{ scale: 0.97 }}
-            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-            onClick={signOut}
-            title={collapsed ? 'Sign out' : undefined}
-            className={cn(
-              'flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-ink/60 hover:bg-rust-100 hover:text-rust-600 transition-colors duration-150',
-              collapsed && 'justify-center px-2'
-            )}
-          >
-            <LogOut size={17} className="shrink-0" />
-            {!collapsed && 'Sign out'}
-          </motion.button>
-        </div>
+        <SidebarContent collapsed={collapsed} />
       </motion.aside>
-      <main className="flex-1 min-w-0 p-6 sm:p-8">
+
+      <main className="flex-1 min-w-0 p-4 sm:p-6 md:p-8">
         <div className="max-w-6xl mx-auto">
           <Outlet />
         </div>
