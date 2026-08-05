@@ -6,11 +6,11 @@ export function Card({ className, interactive, ...props }) {
   if (interactive) {
     return (
       <motion.div
-        whileHover={{ y: -2 }}
+        whileHover={{ y: -3 }}
         whileTap={{ scale: 0.99 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+        transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
         className={cn(
-          'bg-panel border border-line rounded-lg shadow-card cursor-pointer',
+          'bg-panel border border-line rounded-xl shadow-card hover:shadow-elevated cursor-pointer transition-shadow duration-200',
           className
         )}
         {...props}
@@ -19,7 +19,7 @@ export function Card({ className, interactive, ...props }) {
   }
   return (
     <div
-      className={cn('bg-panel border border-line rounded-lg shadow-card', className)}
+      className={cn('bg-panel border border-line rounded-xl shadow-card', className)}
       {...props}
     />
   );

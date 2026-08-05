@@ -9,10 +9,22 @@
 body {
   -webkit-font-smoothing: antialiased;
   letter-spacing: 0;
+  line-height: 1.5;
 }
 
-h1, .font-display {
+/* Typography — tracking/leading are size-specific, never one fixed value */
+h1, .text-3xl, .text-2xl {
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+h2, .text-xl, .text-lg, .font-display {
   letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+
+.text-sm {
+  letter-spacing: -0.005em;
 }
 
 .text-xs {
@@ -28,6 +40,25 @@ h1, .font-display {
   outline-offset: 2px;
 }
 
+/* Frosted glass chrome — sidebars, toolbars, sheets */
+.glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+.glass-top-edge {
+  border-top: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Press feedback for non-JS elements (native buttons/links) */
+.press {
+  transition: transform 100ms ease-out;
+}
+.press:active {
+  transform: scale(0.97);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -35,5 +66,22 @@ h1, .font-display {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass {
+    background: theme('colors.panel');
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .glass {
+    background: theme('colors.panel');
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-width: 1.5px;
   }
 }

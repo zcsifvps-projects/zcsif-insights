@@ -52,23 +52,23 @@ function GlobalSearch() {
   return (
     <div className="relative" ref={boxRef}>
       <div className="relative">
-        <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ink/40" />
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/40" />
         <input
           value={query}
           onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
           placeholder="Search events, trainings…"
-          className="w-full h-8 rounded-md border border-line bg-panel pl-8 pr-2 text-xs text-ink placeholder:text-ink/40 focus:border-forest-500 focus:ring-1 focus:ring-forest-500"
+          className="w-full h-9 rounded-xl border border-line bg-panel/70 pl-8 pr-2 text-xs text-ink placeholder:text-ink/40 transition-shadow focus:border-forest-500 focus:ring-4 focus:ring-forest-500/12 focus:outline-none"
         />
       </div>
       <AnimatePresence>
         {open && q && (
           <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.12 }}
-            className="absolute left-0 right-0 mt-1 rounded-md border border-line bg-panel shadow-card z-20 max-h-80 overflow-y-auto"
+            initial={{ opacity: 0, y: -4, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.98 }}
+            transition={{ type: 'spring', bounce: 0, duration: 0.2 }}
+            className="glass absolute left-0 right-0 mt-1.5 rounded-xl border border-line/70 shadow-elevated z-20 max-h-80 overflow-y-auto"
           >
             {!hasResults ? (
               <p className="px-3 py-3 text-xs text-ink/40">No matches</p>
@@ -81,7 +81,7 @@ function GlobalSearch() {
                       <button
                         key={e.id}
                         onClick={() => go(`/events/${e.id}`)}
-                        className="block w-full text-left px-3 py-1.5 text-xs text-ink hover:bg-forest-50"
+                        className="block w-full text-left px-3 py-1.5 text-xs text-ink hover:bg-forest-50 rounded-lg"
                       >
                         {e.event_name}
                       </button>
@@ -95,7 +95,7 @@ function GlobalSearch() {
                       <button
                         key={t.id}
                         onClick={() => go(`/trainings/${t.id}`)}
-                        className="block w-full text-left px-3 py-1.5 text-xs text-ink hover:bg-forest-50"
+                        className="block w-full text-left px-3 py-1.5 text-xs text-ink hover:bg-forest-50 rounded-lg"
                       >
                         {t.training_title}
                       </button>
@@ -121,10 +121,10 @@ function SidebarContent({ collapsed, onNavigate }) {
           <p className="font-display text-lg font-semibold text-forest-700 leading-tight">Z</p>
         ) : (
           <>
-            <p className="font-display text-lg font-semibold text-forest-700 leading-tight tracking-[-0.015em] whitespace-nowrap">
+            <p className="font-display text-lg font-semibold text-forest-700 leading-tight tracking-[-0.02em] whitespace-nowrap">
               ZCSIF
             </p>
-            <p className="text-xs text-ink/50 mt-0.5 tracking-[0.005em] whitespace-nowrap">Engagement Tracker</p>
+            <p className="text-xs text-ink/50 mt-0.5 whitespace-nowrap">Engagement Tracker</p>
           </>
         )}
       </div>
@@ -135,7 +135,7 @@ function SidebarContent({ collapsed, onNavigate }) {
         </div>
       )}
 
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="flex-1 px-3 py-4 space-y-0.5">
         {NAV.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
@@ -147,10 +147,10 @@ function SidebarContent({ collapsed, onNavigate }) {
           >
             {({ isActive }) => (
               <motion.div
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 32 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: 'spring', bounce: 0, duration: 0.25 }}
                 className={cn(
-                  'relative flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium',
+                  'relative flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium',
                   collapsed && 'justify-center px-2',
                   isActive ? 'text-forest-700' : 'text-ink/70 hover:text-ink'
                 )}
@@ -158,8 +158,8 @@ function SidebarContent({ collapsed, onNavigate }) {
                 {isActive && (
                   <motion.div
                     layoutId="nav-active"
-                    className="absolute inset-0 rounded-md bg-forest-50"
-                    transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+                    className="absolute inset-0 rounded-xl bg-forest-50"
+                    transition={{ type: 'spring', bounce: 0, duration: 0.35 }}
                   />
                 )}
                 <Icon size={17} className="relative shrink-0" />
@@ -174,11 +174,11 @@ function SidebarContent({ collapsed, onNavigate }) {
         {!collapsed && <p className="px-3 text-xs text-ink/50 truncate mb-2">{user?.email}</p>}
         <motion.button
           whileTap={{ scale: 0.97 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+          transition={{ type: 'spring', bounce: 0, duration: 0.25 }}
           onClick={signOut}
           title={collapsed ? 'Sign out' : undefined}
           className={cn(
-            'flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-ink/60 hover:bg-rust-100 hover:text-rust-600 transition-colors duration-150',
+            'flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-ink/60 hover:bg-rust-100 hover:text-rust-600 transition-colors duration-150',
             collapsed && 'justify-center px-2'
           )}
         >
@@ -215,18 +215,22 @@ export default function Layout() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
-      <div className="md:hidden flex items-center justify-between px-4 h-14 border-b border-line bg-panel/80 backdrop-blur-xl sticky top-0 z-30">
-        <button
+    <div className="min-h-screen flex flex-col md:flex-row bg-paper">
+      {/* Mobile top bar */}
+      <div className="glass glass-top-edge md:hidden flex items-center justify-between px-4 h-14 border-b border-line/70 sticky top-0 z-30">
+        <motion.button
+          whileTap={{ scale: 0.92 }}
+          transition={{ type: 'spring', bounce: 0, duration: 0.2 }}
           onClick={() => setMobileOpen(true)}
-          className="flex h-9 w-9 items-center justify-center rounded-md text-ink/70 hover:bg-forest-50 hover:text-forest-700"
+          className="flex h-9 w-9 items-center justify-center rounded-xl text-ink/70 hover:bg-forest-50 hover:text-forest-700"
         >
           <Menu size={20} />
-        </button>
+        </motion.button>
         <p className="font-display text-base font-semibold text-forest-700">ZCSIF</p>
         <div className="w-9" />
       </div>
 
+      {/* Mobile drawer + backdrop */}
       <AnimatePresence>
         {mobileOpen && (
           <>
@@ -234,40 +238,46 @@ export default function Layout() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
               onClick={() => setMobileOpen(false)}
-              className="md:hidden fixed inset-0 bg-black/40 z-40"
+              className="md:hidden fixed inset-0 bg-ink/40 backdrop-blur-[2px] z-40"
             />
             <motion.aside
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ type: 'spring', stiffness: 420, damping: 40 }}
-              className="md:hidden fixed inset-y-0 left-0 w-72 max-w-[80vw] bg-panel border-r border-line z-50 flex flex-col"
+              transition={{ type: 'spring', bounce: 0.08, duration: 0.35 }}
+              className="glass md:hidden fixed inset-y-0 left-0 w-72 max-w-[80vw] border-r border-line/70 z-50 flex flex-col"
             >
-              <button
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                transition={{ type: 'spring', bounce: 0, duration: 0.2 }}
                 onClick={() => setMobileOpen(false)}
-                className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-md text-ink/60 hover:bg-forest-50 hover:text-forest-700"
+                className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-ink/60 hover:bg-forest-50 hover:text-forest-700"
               >
                 <X size={18} />
-              </button>
+              </motion.button>
               <SidebarContent collapsed={false} onNavigate={() => setMobileOpen(false)} />
             </motion.aside>
           </>
         )}
       </AnimatePresence>
 
+      {/* Desktop sidebar */}
       <motion.aside
         animate={{ width: collapsed ? 72 : 256 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 36 }}
-        className="hidden md:flex shrink-0 border-r border-line bg-panel/70 backdrop-blur-xl flex-col relative"
+        transition={{ type: 'spring', bounce: 0, duration: 0.35 }}
+        className="glass hidden md:flex shrink-0 border-r border-line/70 flex-col relative"
       >
-        <button
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          transition={{ type: 'spring', bounce: 0, duration: 0.2 }}
           onClick={() => setCollapsed((c) => !c)}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           className="absolute -right-3 top-7 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-line bg-panel text-ink/60 shadow-card hover:text-forest-700 hover:border-forest-500 transition-colors"
         >
           {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-        </button>
+        </motion.button>
         <SidebarContent collapsed={collapsed} />
       </motion.aside>
 
