@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { CalendarDays, GraduationCap, MessageSquareText, LayoutDashboard, LogOut, Search } from 'lucide-react';
+import { CalendarDays, GraduationCap, MessageSquareText, LayoutDashboard, LogOut, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { cn } from '@/lib/utils';
 import { EventsApi, TrainingsApi } from '@/api/supabaseClient';
@@ -113,19 +113,54 @@ function GlobalSearch() {
 
 export default function Layout() {
   const { user, signOut } = useAuth();
+  const [collapsed, setCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('zcsif_sidebar_collapsed') === '1';
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('zcsif_sidebar_collapsed', collapsed ? '1' : '0');
+    } catch {}
+  }, [collapsed]);
 
   return (
     <div className="min-h-screen flex">
-      <aside className="w-64 shrink-0 border-r border-line bg-panel/70 backdrop-blur-xl flex flex-col">
-        <div className="px-5 py-6 border-b border-line/70">
-          <p className="font-display text-lg font-semibold text-forest-700 leading-tight tracking-[-0.015em]">
-            ZCSIF
-          </p>
-          <p className="text-xs text-ink/50 mt-0.5 tracking-[0.005em]">Engagement Tracker</p>
+      <motion.aside
+        animate={{ width: collapsed ? 72 : 256 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 36 }}
+        className="shrink-0 border-r border-line bg-panel/70 backdrop-blur-xl flex flex-col relative"
+      >
+        <button
+          onClick={() => setCollapsed((c) => !c)}
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className="absolute -right-3 top-7 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-line bg-panel text-ink/60 shadow-card hover:text-forest-700 hover:border-forest-500 transition-colors"
+        >
+          {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+        </button>
+
+        <div className={cn('px-5 py-6 border-b border-line/70 overflow-hidden', collapsed && 'px-0 flex justify-center')}>
+          {collapsed ? (
+            <p className="font-display text-lg font-semibold text-forest-700 leading-tight">Z</p>
+          ) : (
+            <>
+              <p className="font-display text-lg font-semibold text-forest-700 leading-tight tracking-[-0.015em] whitespace-nowrap">
+                ZCSIF
+              </p>
+              <p className="text-xs text-ink/50 mt-0.5 tracking-[0.005em] whitespace-nowrap">Engagement Tracker</p>
+            </>
+          )}
         </div>
-        <div className="px-3 pt-3">
-          <GlobalSearch />
-        </div>
+
+        {!collapsed && (
+          <div className="px-3 pt-3">
+            <GlobalSearch />
+          </div>
+        )}
+
         <nav className="flex-1 px-3 py-4 space-y-1">
           {NAV.map(({ to, label, icon: Icon, end }) => (
             <NavLink
@@ -133,6 +168,7 @@ export default function Layout() {
               to={to}
               end={end}
               className="relative block"
+              title={collapsed ? label : undefined}
             >
               {({ isActive }) => (
                 <motion.div
@@ -140,6 +176,7 @@ export default function Layout() {
                   transition={{ type: 'spring', stiffness: 500, damping: 32 }}
                   className={cn(
                     'relative flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium',
+                    collapsed && 'justify-center px-2',
                     isActive ? 'text-forest-700' : 'text-ink/70 hover:text-ink'
                   )}
                 >
@@ -150,26 +187,31 @@ export default function Layout() {
                       transition={{ type: 'spring', stiffness: 500, damping: 38 }}
                     />
                   )}
-                  <Icon size={17} className="relative" />
-                  <span className="relative">{label}</span>
+                  <Icon size={17} className="relative shrink-0" />
+                  {!collapsed && <span className="relative whitespace-nowrap">{label}</span>}
                 </motion.div>
               )}
             </NavLink>
           ))}
         </nav>
-        <div className="px-3 py-4 border-t border-line/70">
-          <p className="px-3 text-xs text-ink/50 truncate mb-2">{user?.email}</p>
+
+        <div className={cn('px-3 py-4 border-t border-line/70', collapsed && 'px-2')}>
+          {!collapsed && <p className="px-3 text-xs text-ink/50 truncate mb-2">{user?.email}</p>}
           <motion.button
             whileTap={{ scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 500, damping: 30 }}
             onClick={signOut}
-            className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-ink/60 hover:bg-rust-100 hover:text-rust-600 transition-colors duration-150"
+            title={collapsed ? 'Sign out' : undefined}
+            className={cn(
+              'flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-ink/60 hover:bg-rust-100 hover:text-rust-600 transition-colors duration-150',
+              collapsed && 'justify-center px-2'
+            )}
           >
-            <LogOut size={17} />
-            Sign out
+            <LogOut size={17} className="shrink-0" />
+            {!collapsed && 'Sign out'}
           </motion.button>
         </div>
-      </aside>
+      </motion.aside>
       <main className="flex-1 min-w-0 p-6 sm:p-8">
         <div className="max-w-6xl mx-auto">
           <Outlet />
