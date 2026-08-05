@@ -1,4 +1,3 @@
-cat > src/components/layout/Layout.jsx << 'EOF'
 import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
